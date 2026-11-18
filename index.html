@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>APEX PRIVATE BANK</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0a1628;--navy-mid:#1a3358;--sky:#3b82f6;--sky-light:#60a5fa;--white:#fff;--off-white:#f8fafc;--gray-50:#f9fafb;--gray-100:#f1f5f9;--gray-200:#e2e8f0;--gray-400:#94a3b8;--gray-500:#64748b;--gray-600:#475569;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--shadow:0 4px 20px rgba(10,22,40,.07);--radius:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,sans-serif;background:var(--off-white);color:var(--navy);min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input{font:inherit}
+.login-screen{position:fixed;inset:0;background:linear-gradient(145deg,#0a1628,#12233d 50%,#0f1c2e);display:flex;align-items:center;justify-content:center;z-index:2000;padding:20px}
+.login-screen.hidden{display:none}
+.login-card{background:white;color:#0a1628;border-radius:20px;padding:42px 36px;width:100%;max-width:400px;box-shadow:0 25px 60px #0005}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo-icon{width:58px;height:58px;background:linear-gradient(135deg,var(--sky),#2563eb);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:24px;color:white;margin-bottom:14px}
+.login-logo h1{font-size:20px;font-weight:700}
+.login-logo p{font-size:12px;color:var(--gray-500);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.login-form label,.modal label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--gray-600)}
+.login-form input,.modal input{width:100%;padding:13px 16px;border:1.5px solid var(--gray-200);border-radius:10px;font-size:15px;margin-bottom:16px;outline:none}
+.login-form input:focus,.modal input:focus{border-color:var(--sky);box-shadow:0 0 0 3px #3b82f61f}
+.login-error{background:#fef2f2;color:var(--danger);font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none}
+.login-error.show{display:block}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--sky),#2563eb);color:white;border:0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+.forgot-link{width:100%;border:0;background:none;color:var(--sky);padding:14px;cursor:pointer;font-size:13px;font-weight:600}
+.app{display:none;min-height:100vh}.app.visible{display:flex}
+.sidebar{width:260px;background:var(--navy);color:white;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-header{padding:24px;border-bottom:1px solid #ffffff12}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--sky),var(--sky-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px}
+.logo-text{font-size:15px;font-weight:600}.logo-text span{display:block;font-size:11px;opacity:.55;letter-spacing:1.2px;text-transform:uppercase}
+.nav-menu{flex:1;padding:16px 12px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:11px;color:#ffffffa6;font-size:14px;font-weight:500;border:0;background:none;width:100%;text-align:left;cursor:pointer;margin-bottom:3px}
+.nav-item:hover,.nav-item.active{background:#3b82f626;color:var(--sky-light)}
+.sidebar-footer{padding:16px;border-top:1px solid #ffffff12}
+.user-chip{display:flex;align-items:center;gap:12px;padding:11px;border-radius:11px;background:#ffffff0d;cursor:pointer}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--sky),#2563eb);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;color:white}
+.user-info .name{font-size:13px;font-weight:600}.user-info .role{font-size:11px;opacity:.5}
+.main{flex:1;margin-left:260px;min-height:100vh}
+.topbar{background:white;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-200);position:sticky;top:0;z-index:50}
+.page-title{font-size:20px;font-weight:600}
+.content{padding:28px;max-width:1100px}
+.section{display:none}.section.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.greeting{font-size:15px;color:var(--gray-500);margin-bottom:6px}.greeting strong{color:var(--navy);font-weight:600}
+.balance-card{background:linear-gradient(135deg,var(--navy),var(--navy-mid));color:white;border-radius:var(--radius);padding:28px;margin-bottom:24px;position:relative;overflow:hidden}
+.balance-card:after{content:'';position:absolute;top:-40%;right:-15%;width:260px;height:260px;background:radial-gradient(circle,#3b82f633,transparent 70%)}
+.balance-label{font-size:13px;opacity:.7;margin-bottom:6px}.balance-amount{font-size:36px;font-weight:700;letter-spacing:-.5px;margin-bottom:6px}.balance-sub{font-size:13px;opacity:.7;margin-bottom:18px}
+.balance-meta{display:flex;gap:28px;font-size:13px}.balance-meta span{opacity:.65;display:block;font-size:12px}.balance-meta strong{font-size:14px;font-weight:600}
+.quick-actions{display:flex;gap:10px;margin-top:22px}
+.action-btn{flex:1;padding:12px;border-radius:11px;border:0;background:#ffffff1f;color:white;font-size:13px;font-weight:500;cursor:pointer}.action-btn:hover{background:#ffffff33}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.info-card{background:white;border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+.info-card .label{font-size:12px;color:var(--gray-500);margin-bottom:4px}.info-card .value{font-size:16px;font-weight:600}
+.card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.card-title{font-size:15px;font-weight:600}
+.tx-filters{display:flex;gap:8px;margin:14px 0}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--gray-200);background:white;font-size:13px;font-weight:500;color:var(--gray-600);cursor:pointer}
+.filter-btn.active{background:var(--navy);color:white;border-color:var(--navy)}
+.tx-item{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--gray-100)}.tx-item:last-child{border-bottom:0}
+.tx-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tx-icon.debit{background:#fef2f2}.tx-icon.credit{background:#ecfdf5}.tx-icon.transfer{background:#eff6ff}
+.tx-details{flex:1;min-width:0}.tx-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tx-date{font-size:12px;color:var(--gray-500);margin-top:2px}
+.tx-amount{font-size:14px;font-weight:600;white-space:nowrap}.tx-amount.debit{color:var(--danger)}.tx-amount.credit{color:var(--success)}
+.account-item{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--gray-100)}.account-item:last-child{border:0}
+.account-left{display:flex;align-items:center;gap:14px}.account-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.account-name{font-size:14px;font-weight:600}.account-meta{font-size:12px;color:var(--gray-500);margin-top:2px}.account-balance{font-size:16px;font-weight:700;text-align:right}.account-type{font-size:11px;color:var(--gray-500);text-align:right;margin-top:2px}
+.bank-card{background:linear-gradient(135deg,#1e3a5f,#0f2744);border-radius:16px;padding:24px;color:white;max-width:360px;min-height:190px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.bank-card.frozen{filter:grayscale(.7);opacity:.85}.bank-card.frozen:before{content:'FROZEN';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-size:28px;font-weight:700;letter-spacing:4px;color:#ffffff40;pointer-events:none}
+.card-chip{width:44px;height:32px;background:linear-gradient(135deg,#f0d78c,#d4af37);border-radius:6px}.card-number{font-size:20px;letter-spacing:3.5px;font-family:monospace;margin:14px 0}.card-bottom{display:flex;justify-content:space-between;font-size:13px}.card-bottom label{font-size:10px;opacity:.6;display:block;text-transform:uppercase;letter-spacing:.5px}
+.card-controls{margin-top:20px}.control-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--gray-100)}.control-row:last-child{border-bottom:0}
+.control-label{font-size:14px;font-weight:500}.control-desc{font-size:12px;color:var(--gray-500);margin-top:2px}
+.toggle{width:46px;height:26px;background:var(--gray-200);border-radius:13px;position:relative;cursor:pointer;transition:.25s;flex-shrink:0}
+.toggle.on{background:var(--sky)}.toggle:after{content:'';position:absolute;width:20px;height:20px;background:white;border-radius:50%;top:3px;left:3px;transition:.25s;box-shadow:0 1px 3px #0003}.toggle.on:after{left:23px}
+.profile-header{text-align:center;padding:12px 0 8px}.profile-avatar{width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,var(--sky),#2563eb);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:600;color:white;margin:0 auto 14px}
+.profile-name{font-size:22px;font-weight:700;margin-bottom:4px;cursor:pointer}.profile-email{font-size:14px;color:var(--gray-500);cursor:pointer}
+.profile-badge{display:inline-block;margin-top:12px;padding:5px 14px;background:#3b82f61a;color:var(--sky);font-size:12px;font-weight:600;border-radius:20px}
+.detail-row{display:flex;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--gray-100);font-size:14px}.detail-row:last-child{border:0}.detail-label{color:var(--gray-500)}.detail-value{font-weight:500;text-align:right}
+.modal-overlay{position:fixed;inset:0;background:#0a162880;backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}.modal-overlay.show{display:flex}
+.modal{background:white;color:var(--navy);border-radius:16px;padding:28px;width:100%;max-width:400px;max-height:90vh;overflow:auto;box-shadow:0 20px 50px #0002}
+.modal h3{font-size:18px;font-weight:600;margin-bottom:6px}.modal p{font-size:13px;color:var(--gray-500);margin-bottom:18px}
+.modal-actions{display:flex;gap:12px;margin-top:6px}.btn{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:600;border:0;cursor:pointer}.btn-primary{background:var(--sky);color:white}.btn-secondary{background:var(--gray-100);color:var(--gray-600)}.btn-warning{background:var(--warning);color:white}
+.warning-box{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px;margin-bottom:20px}.warning-box h4{color:#b45309;font-size:14px;margin-bottom:8px}.warning-box p{color:#92400e;font-size:13px;line-height:1.5;margin:0}
+.toast-container{position:fixed;top:20px;right:20px;z-index:3000;display:flex;flex-direction:column;gap:10px}
+.toast{background:white;color:var(--navy);border-radius:12px;padding:14px 18px;min-width:260px;box-shadow:0 10px 30px #0002;border-left:4px solid var(--sky);animation:slideIn .3s ease}
+.toast.success{border-color:var(--success)}.toast.danger{border-color:var(--danger)}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+.menu-toggle{display:none;width:40px;height:40px;border-radius:50%;border:0;background:var(--gray-100);cursor:pointer;font-size:18px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:#0006;z-index:90}.sidebar-overlay.show{display:block}
+.mobile-bottom-nav{display:none}
+@media(max-width:768px){
+ .sidebar{transform:translateX(-100%);transition:.3s}.sidebar.open{transform:translateX(0)}
+ .main{margin-left:0}.menu-toggle{display:flex;align-items:center;justify-content:center}
+ .content{padding:18px 14px 105px}.topbar{padding:12px 16px}.page-title{font-size:18px}
+ .balance-card{padding:22px 18px}.balance-amount{font-size:clamp(25px,7vw,32px);overflow-wrap:anywhere}
+ .balance-meta{gap:16px;flex-wrap:wrap}.quick-actions{gap:7px}.action-btn{padding:12px 6px;font-size:12px}
+ .grid-2{grid-template-columns:1fr}.card{padding:17px}.tx-item{gap:10px}.tx-icon{width:38px;height:38px}.tx-amount{font-size:12px}
+ .bank-card{width:100%;max-width:100%}.modal{padding:22px;max-height:85vh}
+ .mobile-bottom-nav{position:fixed;display:flex;left:0;right:0;bottom:0;height:calc(68px + env(safe-area-inset-bottom));padding:8px 5px env(safe-area-inset-bottom);background:#fffffff5;backdrop-filter:blur(18px);border-top:1px solid var(--gray-200);justify-content:space-around;align-items:center;z-index:150}
+ .mobile-nav-item{border:0;background:transparent;color:var(--gray-500);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1;height:100%;cursor:pointer}
+ .mobile-nav-item span{font-size:22px;line-height:1}.mobile-nav-item small{font-size:10px;font-weight:600}
+ .mobile-nav-item.active{color:var(--sky)}
+}
+body.dark-mode{--off-white:#0b1220;--white:#111c2e;--gray-50:#111c2e;--gray-100:#1b2940;--gray-200:#263750;--gray-400:#8494aa;--gray-500:#9aabc0;--gray-600:#c1cede;--navy:#e8eef8;color:#e8eef8;background:#0b1220}
+body.dark-mode .topbar,body.dark-mode .card,body.dark-mode .info-card,body.dark-mode .modal,body.dark-mode .toast{background:#111c2e;color:#e8eef8}
+body.dark-mode .sidebar{background:#070d18}
+body.dark-mode .balance-card{background:linear-gradient(135deg,#101c31,#1b3558)}
+body.dark-mode .account-name,body.dark-mode .card-title,body.dark-mode .control-label,body.dark-mode .profile-name,body.dark-mode .detail-value,body.dark-mode .page-title,body.dark-mode .greeting strong{color:#e8eef8}
+body.dark-mode .modal input{background:#0b1627;border-color:#30415b;color:white}
+body.dark-mode .filter-btn{background:#17243a;border-color:#30415b;color:#c1cede}
+body.dark-mode .filter-btn.active{background:#2563eb;color:white}
+body.dark-mode .btn-secondary{background:#263750;color:white}
+body.dark-mode .mobile-bottom-nav{background:#0b1220f5;border-color:#263750}
+body.dark-mode .mobile-nav-item{color:#9aabc0}body.dark-mode .mobile-nav-item.active{color:#60a5fa}
+body.dark-mode .warning-box{background:#332a16;border-color:#66501d}body.dark-mode .warning-box h4{color:#fbbf24}body.dark-mode .warning-box p{color:#fcd985}
+body.dark-mode .tx-icon.debit{background:#3b1c28}body.dark-mode .tx-icon.credit{background:#12372d}body.dark-mode .tx-icon.transfer{background:#172d4d}
+</style>
+</head>
+<body>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="login-screen" id="loginScreen">
+ <div class="login-card">
+  <div class="login-logo"><div class="login-logo-icon">A</div><h1>APEX PRIVATE BANK</h1><p>Secure Client Access</p></div>
+  <div class="login-error" id="loginError">Invalid username or password</div>
+  <form class="login-form" id="loginForm">
+   <label>Username</label><input type="text" id="username" placeholder="Enter username" required autocomplete="username">
+   <label>Password</label><input type="password" id="password" placeholder="Enter password" required autocomplete="current-password">
+   <button type="submit" class="login-btn">Sign In</button>
+   <button type="button" class="forgot-link" id="forgotPasswordBtn">Forgot Password?</button>
+  </form>
+ </div>
+</div>
+
+<div class="app" id="mainApp">
+ <aside class="sidebar" id="sidebar">
+  <div class="sidebar-header"><div class="logo"><div class="logo-icon">A</div><div class="logo-text">APEX<span>Private Bank</span></div></div></div>
+  <nav class="nav-menu">
+   <button class="nav-item active" data-section="home">⌂ &nbsp; Home</button>
+   <button class="nav-item" data-section="accounts">▤ &nbsp; Accounts</button>
+   <button class="nav-item" data-section="cards">▣ &nbsp; Cards</button>
+   <button class="nav-item" data-section="transactions">⇄ &nbsp; Transactions</button>
+   <button class="nav-item" data-section="profile">◉ &nbsp; Profile</button>
+   <button class="nav-item" data-section="settings">⚙ &nbsp; Settings</button>
+  </nav>
+  <div class="sidebar-footer"><div class="user-chip" data-section="profile"><div class="avatar" id="sidebarAvatar">MR</div><div class="user-info"><div class="name" id="sidebarName">Mahalia Reed</div><div class="role">Private Client</div></div></div></div>
+ </aside>
+ <div class="sidebar-overlay" id="sidebarOverlay"></div>
+ <main class="main">
+  <header class="topbar"><div style="display:flex;align-items:center;gap:12px"><button class="menu-toggle" id="menuToggle">☰</button><h1 class="page-title" id="pageTitle">Home</h1></div></header>
+  <div class="content">
+   <section class="section active" id="section-home">
+    <div class="greeting" id="greeting">Good evening, <strong>Mahalia</strong></div>
+    <div class="balance-card">
+     <div class="balance-label">Available Balance</div><div class="balance-amount" id="mainBalance">$151,500.00</div>
+     <div class="balance-sub">Current Balance: <span id="currentBalance">$151,500.00</span></div>
+     <div class="balance-meta"><div><span>Account</span><strong>•••• 4829</strong></div><div><span>Status</span><strong style="color:#34d399">Active</strong></div><div><span>Last Login</span><strong id="lastLogin">Today</strong></div></div>
+     <div class="quick-actions"><button class="action-btn" id="transferBtn">Transfer</button><button class="action-btn" id="payBtn">Pay</button><button class="action-btn" id="depositBtn">Deposit</button></div>
+    </div>
+    <div class="grid-2"><div class="info-card"><div class="label">Routing Number</div><div class="value">021000021</div></div><div class="info-card"><div class="label">Account Number</div><div class="value">••••• 4829</div></div></div>
+    <div class="card"><div class="card-header"><div class="card-title">Recent Transactions</div></div><div id="homeTxList"></div></div>
+   </section>
+   <section class="section" id="section-accounts">
+    <div class="card"><div class="card-title">Your Accounts</div>
+     <div class="account-item"><div class="account-left"><div class="account-icon" style="background:#eff6ff">🏦</div><div><div class="account-name">Everyday Checking</div><div class="account-meta">•••• 4829 · Available</div></div></div><div><div class="account-balance" id="checkingBalance">$134,200.00</div><div class="account-type">Primary</div></div></div>
+     <div class="account-item"><div class="account-left"><div class="account-icon" style="background:#ecfdf5">💰</div><div><div class="account-name">High-Yield Savings</div><div class="account-meta">•••• 7712 · 4.25% APY</div></div></div><div><div class="account-balance">$15,800.00</div><div class="account-type">Savings</div></div></div>
+     <div class="account-item"><div class="account-left"><div class="account-icon" style="background:#fef3c7">📈</div><div><div class="account-name">Investment Portfolio</div><div class="account-meta">•••• 3901 · Brokerage</div></div></div><div><div class="account-balance">$1,500.00</div><div class="account-type">Wealth</div></div></div>
+    </div>
+   </section>
+   <section class="section" id="section-cards">
+    <div class="card"><div class="card-title">Your Card</div>
+     <div class="bank-card" id="bankCard"><div style="display:flex;justify-content:space-between;align-items:center"><div class="card-chip"></div><div style="font-weight:700;font-size:18px;letter-spacing:1px">VISA</div></div><div class="card-number">•••• •••• •••• 4829</div><div class="card-bottom"><div><label>Card Holder</label><span id="cardHolderName">MAHALIA REED</span></div><div><label>Expires</label><span>09/28</span></div></div></div>
+     <div class="card-controls">
+      <div class="control-row"><div><div class="control-label">Freeze Card</div><div class="control-desc">Temporarily lock your card</div></div><div class="toggle" id="freezeToggle"></div></div>
+      <div class="control-row"><div><div class="control-label">Online Payments</div><div class="control-desc">Allow internet transactions</div></div><div class="toggle on" id="onlineToggle"></div></div>
+      <div class="control-row"><div><div class="control-label">International Usage</div><div class="control-desc">Enable foreign transactions</div></div><div class="toggle on" id="intlToggle"></div></div>
+     </div>
+    </div>
+   </section>
+   <section class="section" id="section-transactions">
+    <div class="card"><div class="card-title">Transaction History</div><div class="tx-filters"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn" data-filter="credit">Income</button><button class="filter-btn" data-filter="debit">Expenses</button></div><div id="fullTxList"></div></div>
+   </section>
+   <section class="section" id="section-profile">
+    <div class="card"><div class="profile-header"><div class="profile-avatar" id="profileAvatar">MR</div><div class="profile-name" id="profileName">Mahalia Reed</div><div class="profile-email" id="profileEmail">mahali.reed@email.com</div><div class="profile-badge">Private Client</div></div>
+     <div style="margin-top:20px;border-top:1px solid var(--gray-100);padding-top:8px">
+      <div class="detail-row"><span class="detail-label">Client ID</span><span class="detail-value">APB-2019-84721</span></div>
+      <div class="detail-row"><span class="detail-label">Member Since</span><span class="detail-value">March 2019</span></div>
+      <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value editable-detail" id="profilePhone" title="Click to edit">+1 (555) 284-0193</span></div>
+      <div class="detail-row"><span class="detail-label">Address</span><span class="detail-value editable-detail" id="profileAddress" title="Click to edit">1280 Park Avenue, NY</span></div>
+     </div>
+    </div>
+   </section>
+   <section class="section" id="section-settings">
+    <div class="card"><div class="card-title">Settings</div>
+     <div class="control-row"><div><div class="control-label">Dark Mode</div><div class="control-desc">Switch between light and dark appearance</div></div><div class="toggle" id="darkModeToggle" role="switch" aria-label="Dark mode"></div></div>
+     <div class="control-row"><div><div class="control-label">Push Notifications</div><div class="control-desc">Transaction alerts</div></div><div class="toggle on"></div></div>
+     <div class="control-row"><div><div class="control-label">Biometric Login</div><div class="control-desc">Face ID / Fingerprint</div></div><div class="toggle on"></div></div>
+     <div class="control-row" id="signOutBtn" style="cursor:pointer"><div><div class="control-label" style="color:var(--danger)">Sign Out</div><div class="control-desc">End your session</div></div><div style="font-size:18px;color:var(--gray-400)">›</div></div>
+    </div>
+   </section>
+  </div>
+ </main>
+ <nav class="mobile-bottom-nav">
+  <button class="mobile-nav-item active" data-section="home"><span>⌂</span><small>Home</small></button>
+  <button class="mobile-nav-item" data-section="accounts"><span>▤</span><small>Accounts</small></button>
+  <button class="mobile-nav-item" data-section="cards"><span>▣</span><small>Cards</small></button>
+  <button class="mobile-nav-item" data-section="transactions"><span>⇄</span><small>Activity</small></button>
+  <button class="mobile-nav-item" data-section="profile"><span>◉</span><small>Profile</small></button>
+ </nav>
+</div>
+
+<!-- FEE NOTICE:-->
+<div class="modal-overlay" id="feeWarningModal"><div class="modal"><h3>Important Notice</h3><div class="warning-box"><h4>Mandatory Fee</h4><p>A withdrawal fee of <strong>$1,500</strong> is required prior to the processing of any transaction.</p></div><div class="modal-actions"><button class="btn btn-secondary" id="cancelFeeBtn">Cancel</button><button class="btn btn-warning" id="acknowledgeFeeBtn">I Understand, Continue</button></div></div></div>
+<div class="modal-overlay" id="transferModal"><div class="modal"><h3>Transfer Money</h3><label>To (Account Number)</label><input id="transferTo" type="text" placeholder="Enter account number"><label>Amount ($)</label><input id="transferAmount" type="number" min="0.01" step="0.01" placeholder="0.00"><div class="modal-actions"><button class="btn btn-secondary" id="cancelTransferBtn">Cancel</button><button class="btn btn-primary" id="confirmTransferBtn">Transfer</button></div></div></div>
+<div class="modal-overlay" id="payModal"><div class="modal"><h3>Pay Bill</h3><label>Pay To</label><input id="payTo" type="text" placeholder="Merchant or bill name"><label>Amount ($)</label><input id="payAmount" type="number" min="0.01" step="0.01" placeholder="0.00"><div class="modal-actions"><button class="btn btn-secondary" id="cancelPayBtn">Cancel</button><button class="btn btn-primary" id="confirmPayBtn">Pay Now</button></div></div></div>
+<div class="modal-overlay" id="depositModal"><div class="modal"><h3>Deposit Funds</h3><label>Amount ($)</label><input id="depositAmount" type="number" min="0.01" step="0.01" placeholder="0.00"><div class="modal-actions"><button class="btn btn-secondary" id="cancelDepositBtn">Cancel</button><button class="btn btn-primary" id="confirmDepositBtn">Deposit</button></div></div></div>
+<div class="modal-overlay" id="nameModal"><div class="modal"><h3>Edit Name</h3><input id="nameInput" type="text" placeholder="Enter name"><div class="modal-actions"><button class="btn btn-secondary" id="cancelNameBtn">Cancel</button><button class="btn btn-primary" id="saveNameBtn">Save</button></div></div></div>
+<div class="modal-overlay" id="emailModal"><div class="modal"><h3>Edit Email</h3><input id="emailInput" type="email" placeholder="Enter email"><div class="modal-actions"><button class="btn btn-secondary" id="cancelEmailBtn">Cancel</button><button class="btn btn-primary" id="saveEmailBtn">Save</button></div></div></div>
+<div class="modal-overlay" id="phoneModal"><div class="modal"><h3>Edit Phone Number</h3><label>Phone number</label><input id="phoneInput" type="tel" autocomplete="tel" placeholder="Enter phone number"><div class="modal-actions"><button class="btn btn-secondary" id="cancelPhoneBtn">Cancel</button><button class="btn btn-primary" id="savePhoneBtn">Save</button></div></div></div>
+<div class="modal-overlay" id="addressModal"><div class="modal"><h3>Edit Address</h3><label>Street address</label><input id="addressInput" type="text" autocomplete="street-address" placeholder="Enter your address"><div class="modal-actions"><button class="btn btn-secondary" id="cancelAddressBtn">Cancel</button><button class="btn btn-primary" id="saveAddressBtn">Save</button></div></div></div>
+<div class="modal-overlay" id="forgotPasswordModal"><div class="modal"><h3>Reset Your Password</h3><p>Request a verification code at your registered email address.</p><label>Registered email</label><input type="email" id="recoveryEmail" placeholder="Enter registered email"><div class="modal-actions"><button class="btn btn-secondary" id="cancelRecovery">Cancel</button><button class="btn btn-primary" id="sendRecoveryCode">Send Code</button></div></div></div>
+<div class="modal-overlay" id="verifyPasswordModal"><div class="modal"><h3>Verify Your Email</h3><p>Enter the six-digit code sent to your email and choose a new password.</p><label>Verification Code</label><input id="recoveryCode" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit code"><label>New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="At least 12 characters"><label>Confirm New Password</label><input id="confirmNewPassword" type="password" autocomplete="new-password" placeholder="Confirm password"><div class="modal-actions"><button class="btn btn-secondary" id="cancelVerification">Cancel</button><button class="btn btn-primary" id="resetPasswordBtn">Reset Password</button></div></div></div>
+
+<script>
+'use strict';
+const VALID_USERNAME='Choosen';
+const VALID_PASSWORD='Blessing2026$'; // Demo-only credentials. Never use client-side credentials for a real banking service.
+const DEFAULT_NAME='Mahalia Reed';
+const DEFAULT_EMAIL='mahali.reed@email.com';
+const RECOVERY_API='/api/auth'; // Implement these endpoints on a secure server to send/verify Gmail codes.
+
+const $=id=>document.getElementById(id);
+const loginScreen=$('loginScreen'),mainApp=$('mainApp');
+function showApp(){loginScreen.classList.add('hidden');mainApp.classList.add('visible');updateGreeting()}
+function showLogin(){loginScreen.classList.remove('hidden');mainApp.classList.remove('visible')}
+$('loginForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const user=$('username').value.trim(),pass=$('password').value;
+ if(user===VALID_USERNAME&&pass===VALID_PASSWORD){localStorage.setItem('apex_logged_in','true');$('loginError').classList.remove('show');showApp()}
+ else $('loginError').classList.add('show');
+});
+$('signOutBtn').addEventListener('click',()=>{localStorage.removeItem('apex_logged_in');showLogin()});
+if(localStorage.getItem('apex_logged_in')==='true')showApp();else showLogin();
+
+function updateGreeting(){
+ const h=new Date().getHours();const greeting=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+ const name=(localStorage.getItem('apex_name')||DEFAULT_NAME).trim().split(/\s+/)[0];
+ $('greeting').innerHTML=`${greeting}, <strong>${escapeHTML(name)}</strong>`;
+}
+function escapeHTML(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+const titles={home:'Home',accounts:'Accounts',cards:'Cards',transactions:'Transactions',profile:'Profile',settings:'Settings'};
+function navigateTo(id){
+ document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+ const section=$('section-'+id);if(section)section.classList.add('active');
+ document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.section===id));
+ document.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.toggle('active',b.dataset.section===id));
+ $('pageTitle').textContent=titles[id]||'Home';closeSidebar();
+}
+document.querySelectorAll('.nav-item,.mobile-nav-item,.user-chip').forEach(btn=>btn.addEventListener('click',()=>{if(btn.dataset.section)navigateTo(btn.dataset.section)}));
+const sidebar=$('sidebar'),overlay=$('sidebarOverlay');
+$('menuToggle').addEventListener('click',()=>{sidebar.classList.add('open');overlay.classList.add('show')});
+overlay.addEventListener('click',closeSidebar);
+function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('show')}
+
+let currentBalance=151500;
+let transactions=[
+{name:'Direct Deposit - Apex Corp',date:'Nov 17, 2026',amount:6240,type:'credit',icon:'💼'},
+{name:'Whole Foods Market',date:'Nov 16, 2026',amount:-86.42,type:'debit',icon:'🛒'},
+{name:'Zelle to Sarah M.',date:'Nov 15, 2026',amount:-250,type:'transfer',icon:'↔️'},
+{name:'Shell Gas Station',date:'Nov 15, 2026',amount:-54.2,type:'debit',icon:'⛽'},
+{name:'Netflix Subscription',date:'Nov 14, 2026',amount:-15.99,type:'debit',icon:'🎬'},
+{name:'Interest Credit',date:'Nov 13, 2026',amount:18.42,type:'credit',icon:'💰'},
+{name:'Amazon.com',date:'Nov 12, 2026',amount:-129.99,type:'debit',icon:'📦'},
+{name:'ATM Withdrawal',date:'Nov 11, 2026',amount:-200,type:'debit',icon:'🏧'},
+{name:'Uber Trip',date:'Nov 10, 2026',amount:-24.8,type:'debit',icon:'🚗'},
+{name:'Freelance Payment',date:'Nov 09, 2026',amount:1850,type:'credit',icon:'💻'}
+];
+function formatMoney(n){return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function updateBalance(){$('mainBalance').textContent=formatMoney(currentBalance);$('currentBalance').textContent=formatMoney(currentBalance);$('checkingBalance').textContent=formatMoney(currentBalance-17300)}
+let currentFilter='all';
+function txHTML(tx){return `<div class="tx-item"><div class="tx-icon ${tx.type}">${tx.icon}</div><div class="tx-details"><div class="tx-name">${escapeHTML(tx.name)}</div><div class="tx-date">${escapeHTML(tx.date)}</div></div><div class="tx-amount ${tx.type}">${tx.amount>=0?'+':''}${formatMoney(tx.amount)}</div></div>`}
+function renderTransactions(filter='all'){
+ let list=transactions;if(filter==='credit')list=transactions.filter(t=>t.amount>0);if(filter==='debit')list=transactions.filter(t=>t.amount<0);
+ $('homeTxList').innerHTML=transactions.slice(0,5).map(txHTML).join('');
+ $('fullTxList').innerHTML=list.map(txHTML).join('')||'<div style="padding:20px;text-align:center;color:#94a3b8">No transactions found</div>';
+}
+function addTransaction(name,amount,type,icon){
+ const date=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+ transactions.unshift({name,date,amount,type,icon});currentBalance+=amount;updateBalance();renderTransactions(currentFilter);
+}
+document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+ currentFilter=btn.dataset.filter;renderTransactions(currentFilter);
+}));
+renderTransactions();updateBalance();
+
+function showToast(title,message,type='info'){
+ const toast=document.createElement('div');toast.className=`toast ${type}`;
+ const strong=document.createElement('strong');strong.textContent=title;
+ const span=document.createElement('span');span.style.cssText='display:block;font-size:13px;color:var(--gray-500);margin-top:3px';span.textContent=message;
+ toast.append(strong,span);$('toastContainer').appendChild(toast);setTimeout(()=>toast.remove(),4000);
+}
+function openModal(id){$(id).classList.add('show')}
+function closeModal(id){$(id).classList.remove('show')}
+$('transferBtn').addEventListener('click',()=>openModal('feeWarningModal'));
+$('cancelFeeBtn').addEventListener('click',()=>closeModal('feeWarningModal'));
+$('acknowledgeFeeBtn').addEventListener('click',()=>{closeModal('feeWarningModal');openModal('transferModal')});
+$('cancelTransferBtn').addEventListener('click',()=>closeModal('transferModal'));
+$('confirmTransferBtn').addEventListener('click',()=>{
+ const to=$('transferTo').value.trim(),amount=Number.parseFloat($('transferAmount').value);
+ if(!to||!Number.isFinite(amount)||amount<=0)return showToast('Error','Please enter valid details','danger');
+ if(amount>currentBalance)return showToast('Error','Insufficient funds','danger');
+ addTransaction('Transfer to '+to,-amount,'transfer','↔️');showToast('Demo transaction recorded',formatMoney(amount)+' transfer recorded locally','success');
+ $('transferTo').value='';$('transferAmount').value='';closeModal('transferModal');
+});
+$('payBtn').addEventListener('click',()=>openModal('payModal'));
+$('cancelPayBtn').addEventListener('click',()=>closeModal('payModal'));
+$('confirmPayBtn').addEventListener('click',()=>{
+ const to=$('payTo').value.trim(),amount=Number.parseFloat($('payAmount').value);
+ if(!to||!Number.isFinite(amount)||amount<=0)return showToast('Error','Enter valid details','danger');
+ if(amount>currentBalance)return showToast('Error','Insufficient funds','danger');
+ addTransaction('Payment to '+to,-amount,'debit','💳');showToast('Demo payment recorded','Payment recorded locally only','success');
+ $('payTo').value='';$('payAmount').value='';closeModal('payModal');
+});
+$('depositBtn').addEventListener('click',()=>openModal('depositModal'));
+$('cancelDepositBtn').addEventListener('click',()=>closeModal('depositModal'));
+$('confirmDepositBtn').addEventListener('click',()=>{
+ const amount=Number.parseFloat($('depositAmount').value);
+ if(!Number.isFinite(amount)||amount<=0)return showToast('Error','Enter valid amount','danger');
+ addTransaction('Deposit',amount,'credit','💰');showToast('Demo deposit recorded','Deposit recorded locally only','success');
+ $('depositAmount').value='';closeModal('depositModal');
+});
+
+const freezeToggle=$('freezeToggle'),bankCard=$('bankCard');
+freezeToggle.addEventListener('click',()=>{
+ freezeToggle.classList.toggle('on');bankCard.classList.toggle('frozen');const frozen=freezeToggle.classList.contains('on');
+ showToast(frozen?'Card Frozen':'Card Unfrozen',frozen?'Card marked as frozen in this demo':'Card marked active in this demo','success');
+});
+document.querySelectorAll('.toggle').forEach(toggle=>{
+ if(!['freezeToggle','darkModeToggle'].includes(toggle.id))toggle.addEventListener('click',()=>toggle.classList.toggle('on'));
+});
+
+const profileNameEl=$('profileName'),sidebarNameEl=$('sidebarName'),profileAvatarEl=$('profileAvatar'),sidebarAvatarEl=$('sidebarAvatar'),cardHolderEl=$('cardHolderName');
+function getInitials(name){return name.trim().split(/\s+/).filter(Boolean).map(n=>n[0]).join('').toUpperCase().slice(0,2)}
+function updateName(name){
+ const safeName=name.trim()||DEFAULT_NAME;
+ profileNameEl.textContent=safeName;sidebarNameEl.textContent=safeName;
+ const initials=getInitials(safeName);profileAvatarEl.textContent=initials;sidebarAvatarEl.textContent=initials;
+ cardHolderEl.textContent=safeName.toUpperCase();updateGreeting();
+}
+function openNameEditor(){$('nameInput').value=localStorage.getItem('apex_name')||DEFAULT_NAME;openModal('nameModal')}
+profileNameEl.addEventListener('click',openNameEditor);cardHolderEl.addEventListener('click',openNameEditor);
+$('saveNameBtn').addEventListener('click',()=>{
+ const name=$('nameInput').value.trim();if(!name)return showToast('Name required','Enter a name before saving','danger');
+ localStorage.setItem('apex_name',name);updateName(name);closeModal('nameModal');showToast('Profile Updated','Your name has been saved on this device','success');
+});
+$('cancelNameBtn').addEventListener('click',()=>closeModal('nameModal'));
+const profileEmailEl=$('profileEmail');
+profileEmailEl.addEventListener('click',()=>{
+ $('emailInput').value=localStorage.getItem('apex_email')||DEFAULT_EMAIL;openModal('emailModal');
+});
+$('saveEmailBtn').addEventListener('click',()=>{
+ const email=$('emailInput').value.trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showToast('Invalid Email','Enter a valid email address','danger');
+ localStorage.setItem('apex_email',email);profileEmailEl.textContent=email;closeModal('emailModal');showToast('Email Updated','Email saved on this device','success');
+});
+$('cancelEmailBtn').addEventListener('click',()=>closeModal('emailModal'));
+
+/* Phone number and postal address can be edited and persist on this device. */
+const profilePhoneEl=$('profilePhone'),profileAddressEl=$('profileAddress');
+const DEFAULT_PHONE='+1 (555) 284-0193';
+const DEFAULT_ADDRESS='1280 Park Avenue, NY';
+function openPhoneEditor(){
+ $('phoneInput').value=localStorage.getItem('apex_phone')||DEFAULT_PHONE;
+ openModal('phoneModal');
+}
+function openAddressEditor(){
+ $('addressInput').value=localStorage.getItem('apex_address')||DEFAULT_ADDRESS;
+ openModal('addressModal');
+}
+profilePhoneEl.addEventListener('click',openPhoneEditor);
+profileAddressEl.addEventListener('click',openAddressEditor);
+$('savePhoneBtn').addEventListener('click',()=>{
+ const phone=$('phoneInput').value.trim();
+ if(!phone||phone.replace(/[\\s()+.\\-]/g,'').length<7)
+  return showToast('Invalid Phone Number','Enter a valid phone number','danger');
+ localStorage.setItem('apex_phone',phone);
+ profilePhoneEl.textContent=phone;
+ closeModal('phoneModal');
+ showToast('Phone Updated','Your phone number has been saved on this device','success');
+});
+$('cancelPhoneBtn').addEventListener('click',()=>closeModal('phoneModal'));
+$('saveAddressBtn').addEventListener('click',()=>{
+ const address=$('addressInput').value.trim();
+ if(address.length<5)return showToast('Address Required','Enter a complete address','danger');
+ localStorage.setItem('apex_address',address);
+ profileAddressEl.textContent=address;
+ closeModal('addressModal');
+ showToast('Address Updated','Your address has been saved on this device','success');
+});
+$('cancelAddressBtn').addEventListener('click',()=>closeModal('addressModal'));
+
+updateName(localStorage.getItem('apex_name')||DEFAULT_NAME);
+profileEmailEl.textContent=localStorage.getItem('apex_email')||DEFAULT_EMAIL;
+profilePhoneEl.textContent=localStorage.getItem('apex_phone')||DEFAULT_PHONE;
+profileAddressEl.textContent=localStorage.getItem('apex_address')||DEFAULT_ADDRESS;
+
+/* Theme preference persists across reloads. */
+const darkModeToggle=$('darkModeToggle');
+function applyTheme(enabled){
+ document.body.classList.toggle('dark-mode',enabled);darkModeToggle.classList.toggle('on',enabled);
+ darkModeToggle.setAttribute('aria-checked',String(enabled));localStorage.setItem('apex_dark_mode',String(enabled));
+}
+applyTheme(localStorage.getItem('apex_dark_mode')==='true');
+darkModeToggle.addEventListener('click',()=>applyTheme(!document.body.classList.contains('dark-mode')));
+
+/* Password recovery UI calls a secure server; no fake local code is generated. */
+$('forgotPasswordBtn').addEventListener('click',()=>{
+ $('recoveryEmail').value=localStorage.getItem('apex_email')||DEFAULT_EMAIL;openModal('forgotPasswordModal');
+});
+$('cancelRecovery').addEventListener('click',()=>closeModal('forgotPasswordModal'));
+$('cancelVerification').addEventListener('click',()=>closeModal('verifyPasswordModal'));
+$('sendRecoveryCode').addEventListener('click',async()=>{
+ const email=$('recoveryEmail').value.trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return showToast('Invalid Email','Enter a valid email address','danger');
+ try{
+  const response=await fetch(`${RECOVERY_API}/forgot-password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+  if(!response.ok)throw new Error('Request failed');
+  closeModal('forgotPasswordModal');openModal('verifyPasswordModal');
+  showToast('Code Requested','If the account exists, a verification code will be emailed.','success');
+ }catch(error){showToast('Recovery Unavailable','Connect the secure password-recovery backend before using this feature.','danger')}
+});
+$('resetPasswordBtn').addEventListener('click',async()=>{
+ const email=$('recoveryEmail').value.trim(),code=$('recoveryCode').value.trim(),password=$('newPassword').value,confirmation=$('confirmNewPassword').value;
+ if(!/^\d{6}$/.test(code))return showToast('Invalid Code','Enter the six-digit verification code','danger');
+ if(password.length<12)return showToast('Weak Password','Use at least 12 characters','danger');
+ if(password!==confirmation)return showToast('Password Mismatch','Your passwords do not match','danger');
+ try{
+  const response=await fetch(`${RECOVERY_API}/reset-password`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,code,newPassword:password})});
+  if(!response.ok)throw new Error('Reset failed');
+  closeModal('verifyPasswordModal');$('recoveryCode').value='';$('newPassword').value='';$('confirmNewPassword').value='';
+  showToast('Password Updated','Your password has been reset. Sign in with your new password.','success');
+ }catch(error){showToast('Reset Unavailable','The code may be invalid/expired, or the recovery backend is not connected.','danger')}
+});
+
+/* Keep last-login display current. */
+$('lastLogin').textContent='Today, '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+</script>
+</body>
+</html>
